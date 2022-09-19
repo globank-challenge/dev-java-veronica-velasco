@@ -72,6 +72,6 @@ public class ClienteService implements IClienteService {
 				.direccion(clienteDto.getDireccion()).genero(clienteDto.getGenero()).edad(clienteDto.getEdad())
 				.identificacion(clienteDto.getIdentificacion()).telefono(clienteDto.getTelefono()).build();
 	}
-
+	
 
 }

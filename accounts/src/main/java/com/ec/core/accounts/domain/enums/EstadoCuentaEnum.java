@@ -22,4 +22,10 @@ public enum EstadoCuentaEnum {
 		}
 		return null;
 	}
+	
+	@Override
+	public String toString() {
+		return valor;
+	}
+
 }

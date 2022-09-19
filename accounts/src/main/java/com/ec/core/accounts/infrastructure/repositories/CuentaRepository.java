@@ -1,5 +1,7 @@
 package com.ec.core.accounts.infrastructure.repositories;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -19,7 +21,7 @@ public class CuentaRepository implements ICuentaRepository {
 	}
 
 	@Override
-	public Cuenta guardarCliente(Cuenta cuenta) {
+	public Cuenta guardarCuenta(Cuenta cuenta) {
 		return cuentaJpa.save(cuenta);
 	}
 
@@ -29,4 +31,10 @@ public class CuentaRepository implements ICuentaRepository {
 
 	}
 
+	@Override
+	public List<Cuenta> obtenerCuentaPorIdentificacion(String identificacion) {
+		return cuentaJpa.obtenerCuentasPorIdentificacion(identificacion);
+	}
+
+	
 }

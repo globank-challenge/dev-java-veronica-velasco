@@ -1,81 +1,119 @@
 package com.ec.core.accounts.domain.usecases;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.ec.core.accounts.domain.enums.EstadoClienteEnum;
 import com.ec.core.accounts.domain.enums.EstadoCuentaEnum;
 import com.ec.core.accounts.domain.enums.TipoCuentaEnum;
-import com.ec.core.accounts.domain.models.Cliente;
+import com.ec.core.accounts.domain.enums.TipoMovimientoEnum;
 import com.ec.core.accounts.domain.models.Cuenta;
-import com.ec.core.accounts.domain.models.dtos.ClienteDto;
+import com.ec.core.accounts.domain.models.Movimiento;
 import com.ec.core.accounts.domain.models.dtos.CuentaDto;
+import com.ec.core.accounts.domain.models.dtos.EstadoCuentaDto;
 import com.ec.core.accounts.domain.ports.repositories.ICuentaRepository;
+import com.ec.core.accounts.domain.ports.services.IClienteService;
 import com.ec.core.accounts.domain.ports.services.ICuentaService;
 import com.ec.core.accounts.infrastructure.config.exception.NotFoundException;
 
 @Service
 public class CuentaService implements ICuentaService {
-	
+
 	@Autowired
 	ICuentaRepository iCuentaRepository;
+
+	@Autowired
+	IClienteService iClienteService;
 
 	@Override
 	public CuentaDto obtenerCuenta(String numeroCuenta) {
 		Cuenta cuenta = iCuentaRepository.obtenerCuentaPorNumero(numeroCuenta);
 		if (cuenta == null) {
-			throw new NotFoundException("Numero de cuenta no encontrada" + numeroCuenta);
+			throw new NotFoundException("Numero de cuenta no encontrada");
 		}
-		return obtenerDtoFromCuenta(cuenta);
+		return obtenerCuentaDtoFromCuenta(cuenta);
 	}
 
 	@Override
-	public CuentaDto guardarCuent(CuentaDto cuentaDto) {
-		// TODO Auto-generated method stub
-		return null;
+	public CuentaDto guardarCuenta(CuentaDto cuentaDto) {
+		Cuenta cuenta = obtenerCuentaFromDto(cuentaDto);
+		cuenta = iCuentaRepository.guardarCuenta(cuenta);
+		return obtenerCuentaDtoFromCuenta(cuenta);
 	}
 
 	@Override
 	public CuentaDto actualizarCuenta(String numeroCuenta, CuentaDto cuentaDto) {
-		// TODO Auto-generated method stub
-		return null;
+		Cuenta cuentaEncontrada = iCuentaRepository.obtenerCuentaPorNumero(numeroCuenta);
+		if (cuentaEncontrada == null) {
+			throw new NotFoundException("Cuenta no encontrada ");
+		}
+		Cuenta cuenta = obtenerCuentaFromDto(cuentaDto);
+		cuenta.setId(cuentaEncontrada.getId());
+		cuenta = iCuentaRepository.guardarCuenta(cuenta);
+		return obtenerCuentaDtoFromCuenta(cuenta);
 	}
 
 	@Override
 	public void eliminarCuenta(String numeroCuenta) {
-		// TODO Auto-generated method stub
-		
+		Cuenta cuentaEncontrada = iCuentaRepository.obtenerCuentaPorNumero(numeroCuenta);
+		if (cuentaEncontrada == null) {
+			throw new NotFoundException("Numero de cuenta no encontrado");
+		}
+		iCuentaRepository.eliminarCuenta(cuentaEncontrada);
 	}
 
-	private Cuenta obtenerCuentaFromDto(CuentaDto cuentaDto) {
-		return  Cuenta.builder().id(cuentaDto.getId()).numeroCuenta(cuentaDto.getNumeroCuenta())
-				.tipoCuenta(TipoCuentaEnum.obtenerEnumeracion(cuentaDto.getTipoCuenta())).saldoInicial(cuentaDto.getSaldoInicial())
+	@Override
+	public Cuenta obtenerCuentaFromDto(CuentaDto cuentaDto) {
+		return Cuenta.builder().id(cuentaDto.getId()).numeroCuenta(cuentaDto.getNumeroCuenta())
+				.tipoCuenta(TipoCuentaEnum.obtenerEnumeracion(cuentaDto.getTipoCuenta()))
+				.saldoInicial(cuentaDto.getSaldoInicial())
 				.estado(EstadoCuentaEnum.obtenerEnumeracion(cuentaDto.getEstado()))
-				.cliente(obtenerClienteFromDto(cuentaDto.getClienteDto()))
-				.build();
+				.cliente(iClienteService.obtenerClienteFromDto(cuentaDto.getClienteDto())).build();
 	}
-	
-	private CuentaDto obtenerDtoFromCuenta(Cuenta cuenta) {
+
+	@Override
+	public CuentaDto obtenerCuentaDtoFromCuenta(Cuenta cuenta) {
 		return CuentaDto.builder().id(cuenta.getId()).numeroCuenta(cuenta.getNumeroCuenta())
 				.tipoCuenta(cuenta.getTipoCuenta().toString()).saldoInicial(cuenta.getSaldoInicial())
 				.estado(cuenta.getEstado().toString())
-				.clienteDto(obtenerDtoFromCliente(cuenta.getCliente()))
-				.build();
+				.clienteDto(iClienteService.obtenerDtoFromCliente(cuenta.getCliente())).build();
 	}
-	
-	private ClienteDto obtenerDtoFromCliente(Cliente cliente) {
-		return ClienteDto.builder().id(cliente.getId()).contrasenia(cliente.getContrasenia())
-				.nombre(cliente.getNombre()).edad(cliente.getEdad()).telefono(cliente.getTelefono())
-				.genero(cliente.getGenero()).clienteId(cliente.getClienteId())
-				.identificacion(cliente.getIdentificacion()).estado(cliente.getEstado().toString())
-				.direccion(cliente.getDireccion()).build();
+
+	@Override
+	public List<EstadoCuentaDto> obtenerCuentasPorIdentificacion(String identificacion) {
+		List<Cuenta> cuentas = iCuentaRepository.obtenerCuentaPorIdentificacion(identificacion);
+		if (cuentas == null) {
+			throw new NotFoundException("No existen datos para esa identificacion");
+		}
+
+		Map<String, List<Cuenta>> cuentasPorNumero = cuentas.stream()
+				.collect(Collectors.groupingBy(Cuenta::getNumeroCuenta));
+		List<EstadoCuentaDto> listaEstadosCuenta = new ArrayList<>();
+		for (var entry : cuentasPorNumero.entrySet()) {
+
+			EstadoCuentaDto estadoCuenta = new EstadoCuentaDto();
+			Cuenta cuenta = entry.getValue().get(0);
+			List<Movimiento> movimientosCuenta = cuenta.getMovimientos();
+			List<Movimiento> movimienosCredito = movimientosCuenta.stream()
+					.filter(movimiento -> movimiento.getTipoMovimiento().equals(TipoMovimientoEnum.DEPOSITO))
+					.collect(Collectors.toList());
+
+			List<Movimiento> movimienosDebito = movimientosCuenta.stream()
+					.filter(movimiento -> movimiento.getTipoMovimiento().equals(TipoMovimientoEnum.RETIRO))
+					.collect(Collectors.toList());
+
+			estadoCuenta.setNumeroCuenta(entry.getKey());
+			estadoCuenta.setTotalCreditos(movimienosCredito.size());
+			estadoCuenta.setTotalDebitos(movimienosDebito.size());
+			estadoCuenta.setSaldo(cuenta.getSaldoInicial());
+			listaEstadosCuenta.add(estadoCuenta);
+		}
+
+		return listaEstadosCuenta;
 	}
-	
-	public Cliente obtenerClienteFromDto(ClienteDto clienteDto) {
-		return  Cliente.builder().id(clienteDto.getId()).clienteId(clienteDto.getClienteId())
-				.contrasenia(clienteDto.getContrasenia())
-				.estado(EstadoClienteEnum.obtenerEnumeracion(clienteDto.getEstado())).nombre(clienteDto.getNombre())
-				.direccion(clienteDto.getDireccion()).genero(clienteDto.getGenero()).edad(clienteDto.getEdad())
-				.identificacion(clienteDto.getIdentificacion()).telefono(clienteDto.getTelefono()).build();
-	}
+
 }

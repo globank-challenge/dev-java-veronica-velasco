@@ -23,5 +23,10 @@ public enum TipoMovimientoEnum {
 		}
 		return null;
 	}
+	
+	@Override
+	public String toString() {
+		return valor;
+	}
 
 }

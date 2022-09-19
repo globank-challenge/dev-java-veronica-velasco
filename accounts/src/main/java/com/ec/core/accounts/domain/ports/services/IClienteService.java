@@ -1,5 +1,6 @@
 package com.ec.core.accounts.domain.ports.services;
 
+import com.ec.core.accounts.domain.models.Cliente;
 import com.ec.core.accounts.domain.models.dtos.ClienteDto;
 
 public interface IClienteService {
@@ -11,5 +12,9 @@ public interface IClienteService {
 	ClienteDto actualizarCliente(String id, ClienteDto clienteDto);
 	
 	void eliminarCliente(String identificacion);
+	
+	ClienteDto obtenerDtoFromCliente(Cliente cliente);
+	
+	public Cliente obtenerClienteFromDto(ClienteDto clienteDto);
 
 }

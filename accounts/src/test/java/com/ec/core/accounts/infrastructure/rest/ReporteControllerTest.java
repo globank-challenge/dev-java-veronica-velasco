@@ -25,7 +25,7 @@ public class ReporteControllerTest {
 
 	@Test
 	public void obtenerInformacionCliente() throws Exception {
-		mockMvc.perform(get("/v1/estados-cuenta/1234")).andExpect(status().is2xxSuccessful());
+		mockMvc.perform(get("/v1/estados-cuenta?identificacion=1234")).andExpect(status().is2xxSuccessful());
 	}
 
 }

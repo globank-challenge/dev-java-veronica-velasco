@@ -17,7 +17,7 @@ import com.ec.core.accounts.infrastructure.rest.output.FormatoMensaje;
 import com.ec.core.accounts.infrastructure.rest.output.FormatoSalidaReporte;
 
 @RestController
-@RequestMapping("/v1/admin")
+@RequestMapping("/v1")
 public class ReporteController {
 	
 	private static final Logger log = LoggerFactory.getLogger(ReporteController.class);
@@ -28,24 +28,17 @@ public class ReporteController {
 		this.iCuentaService = iCuentaService;
 	}
 	
-	@GetMapping("/estados/{identificacion}")
+	@GetMapping("/estados-cuenta/{identificacion}")
 	public ResponseEntity<FormatoSalidaReporte<List<EstadoCuentaDto>>> obtenerInformacionCliente(
 			@PathVariable("identificacion") String identificacion) {
 		HttpStatus status = HttpStatus.OK;
 		List<EstadoCuentaDto> cuentasDto = null;
 		try {
 			cuentasDto = iCuentaService.obtenerCuentasPorIdentificacion(identificacion);
-			if (cuentasDto == null) {
-				status = HttpStatus.NOT_FOUND;
-			}
 		} catch (IllegalArgumentException iex) {
 			log.error(iex.getMessage(), iex);
 			status = HttpStatus.BAD_REQUEST;
-		} catch (Exception ex) {
-			log.error(ex.getMessage(), ex);
-			cuentasDto = null;
-			status = HttpStatus.INTERNAL_SERVER_ERROR;
-		}
+		} 
 		FormatoSalidaReporte<List<EstadoCuentaDto>> output = new FormatoSalidaReporte<>();
 		output.setData(List.of(cuentasDto));
 		output.setMessages(List.of(new FormatoMensaje(String.valueOf(status.value()), status.getReasonPhrase())));

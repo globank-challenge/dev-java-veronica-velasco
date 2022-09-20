@@ -43,17 +43,9 @@ public class ClienteController {
 		ClienteDto clienteDto = null;
 		try {
 			clienteDto = iClienteService.obtenerClientePorIdentificacion(identificacion);
-			if (clienteDto == null) {
-				status = HttpStatus.NOT_FOUND;
-			}
 		} catch (IllegalArgumentException iex) {
-			log.error(iex.getMessage(), iex);
 			status = HttpStatus.BAD_REQUEST;
-		} catch (Exception ex) {
-			log.error(ex.getMessage(), ex);
-			clienteDto = null;
-			status = HttpStatus.INTERNAL_SERVER_ERROR;
-		}
+		} 
 		FormatoSalida<ClienteDto> output = new FormatoSalida<>();
 		output.setData(clienteDto);
 		output.setMessages(List.of(new FormatoMensaje(String.valueOf(status.value()), status.getReasonPhrase())));

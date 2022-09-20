@@ -14,6 +14,7 @@ import com.ec.core.accounts.domain.models.dtos.MovimientoDto;
 import com.ec.core.accounts.domain.ports.repositories.IMovimientoRepository;
 import com.ec.core.accounts.domain.ports.services.ICuentaService;
 import com.ec.core.accounts.domain.ports.services.IMovimientoService;
+import com.ec.core.accounts.infrastructure.config.exception.ErrorSaldoException;
 
 @Service
 public class MovimientoService implements IMovimientoService {
@@ -38,8 +39,7 @@ public class MovimientoService implements IMovimientoService {
 			movimiento.setSaldo(calcularSaldo(movimiento.getValor(), movimiento.getCuenta().getSaldoInicial(),
 					movimiento.getTipoMovimiento()));
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new ErrorSaldoException(e.getMessage());
 		}
 		movimiento.getCuenta().setSaldoInicial(movimiento.getSaldo());
 		movimiento = iMovimientoRepository.guardarMovimiento(movimiento);
@@ -52,14 +52,14 @@ public class MovimientoService implements IMovimientoService {
 		try {
 			if (tipoMovimiento.getValor().equals(Constantes.RETIRO)) {
 				if(saldoInicial.equals(BigDecimal.ZERO)) {
-					throw new Exception("El saldo de la cuenta es 0.00");
+					throw new ErrorSaldoException("El saldo de la cuenta es 0.00");
 				}
 				saldo = saldoInicial.subtract(valor);
 			} else {
 				saldo = saldoInicial.add(valor);
 			}
 		} catch (Exception e) {
-			throw new Exception("No se pudo realizar el retiro" + e.getMessage());
+			throw new Exception("No se pudo realizar el retiro. " + e.getMessage());
 		}
 		return saldo;
 	}

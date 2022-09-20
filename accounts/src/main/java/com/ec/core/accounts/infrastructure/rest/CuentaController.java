@@ -47,11 +47,7 @@ public class CuentaController {
 		} catch (IllegalArgumentException iex) {
 			log.error(iex.getMessage(), iex);
 			status = HttpStatus.BAD_REQUEST;
-		} catch (Exception ex) {
-			log.error(ex.getMessage(), ex);
-			cuentaDto = null;
-			status = HttpStatus.NOT_FOUND;
-		}
+		} 
 		FormatoSalida<CuentaDto> output = new FormatoSalida<>();
 		output.setData(cuentaDto);
 		output.setMessages(List.of(new FormatoMensaje(String.valueOf(status.value()), status.getReasonPhrase())));

@@ -33,7 +33,7 @@ public class CuentaService implements ICuentaService {
 	public CuentaDto obtenerCuenta(String numeroCuenta) {
 		Cuenta cuenta = iCuentaRepository.obtenerCuentaPorNumero(numeroCuenta);
 		if (cuenta == null) {
-			throw new NotFoundException("Numero de cuenta no encontrada");
+			throw new NotFoundException("Numero de cuenta no encontrada:" + numeroCuenta);
 		}
 		return obtenerCuentaDtoFromCuenta(cuenta);
 	}
@@ -86,8 +86,8 @@ public class CuentaService implements ICuentaService {
 	@Override
 	public List<EstadoCuentaDto> obtenerCuentasPorIdentificacion(String identificacion) {
 		List<Cuenta> cuentas = iCuentaRepository.obtenerCuentaPorIdentificacion(identificacion);
-		if (cuentas == null) {
-			throw new NotFoundException("No existen datos para esa identificacion");
+		if (cuentas.isEmpty()) {
+			throw new NotFoundException("No existen estados de cuenta para la identificacion: " + identificacion);
 		}
 
 		Map<String, List<Cuenta>> cuentasPorNumero = cuentas.stream()

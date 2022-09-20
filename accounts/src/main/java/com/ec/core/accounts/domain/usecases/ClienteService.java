@@ -22,7 +22,7 @@ public class ClienteService implements IClienteService {
 	public ClienteDto obtenerClientePorIdentificacion(String identificacion) {
 		Cliente clienteOptional = iClienteRepository.findByIdentificacion(identificacion);
 		if (clienteOptional == null) {
-			throw new NotFoundException("Identificacion no encontrada" + identificacion);
+			throw new NotFoundException("Cliente con identificacion no encontrada:" + identificacion);
 		}
 		return obtenerDtoFromCliente(clienteOptional);
 	}

@@ -5,7 +5,6 @@ public enum EstadoClienteEnum {
 	A("ACTIVO"), I("INACTIVO");
 
 	private String valor;
-
 	private EstadoClienteEnum(String valor) {
 		this.valor = valor;
 	}

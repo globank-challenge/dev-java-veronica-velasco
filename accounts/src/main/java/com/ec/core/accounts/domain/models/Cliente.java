@@ -31,13 +31,18 @@ public class Cliente extends Persona{
 	@Column(name = "estado")
 	private EstadoClienteEnum estado;
 	
+	@Column(name = "apellido")
+	private String apellido;
+	
 	@Builder
 	public Cliente(long id, String nombre, String genero, Integer edad, String identificacion, String direccion,
-			String telefono,String clienteId,String contrasenia,EstadoClienteEnum estado) {
+			String telefono,String clienteId,String contrasenia,EstadoClienteEnum estado,String apellido) {
 		super(id, nombre, genero, edad, identificacion, direccion, telefono);
 		this.clienteId=clienteId;
 		this.contrasenia=contrasenia;
 		this.estado=estado;
+		this.apellido=apellido;
+		this.nombre=nombre;
 	}
 	
 

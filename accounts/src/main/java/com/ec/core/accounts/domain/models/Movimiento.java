@@ -35,8 +35,10 @@ public class Movimiento implements Serializable {
 	private long id;
 	@Column(name = "fecha")
 	private Date fecha;
+
 	@Column(name = "TIPO_MOVIMIENTO")
 	private TipoMovimientoEnum tipoMovimiento;
+	
 	@Column(name = "valor")
 	private BigDecimal valor;
 	@Column(name = "saldo")
